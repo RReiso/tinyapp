@@ -1,11 +1,15 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
+const bodyParser = require("body-parser");
 const app = express();
 const PORT = 8080;
 
-// to read data from POST requests
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
 
+// middleware
+app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
+app.use(cookieParser()); // parse cookie header, populate req.cookies with an object keyed by the cookie names
+
+// use ejs as template ngine
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -23,16 +27,17 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// set cookie when user logs in
+app.post("/login", (req, res) => {
+  const { username } = req.body;
+  res.cookie("username", username);
+  res.redirect("/urls");
+});
+
 // show all URLs from database
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
-});
-
-// save the new URL pair in database
-app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  res.redirect("/urls");
 });
 
 // retrieve longURL from database and redirect to it
@@ -46,9 +51,15 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-// create a new URL
+// create new URL
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+// save new URL
+app.post("/urls", (req, res) => {
+  urlDatabase[generateRandomString()] = req.body.longURL;
+  res.redirect("/urls");
 });
 
 // show URL
