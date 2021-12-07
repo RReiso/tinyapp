@@ -12,9 +12,14 @@ app.use(cookieParser()); // parse cookie header, populate req.cookies with an ob
 // use ejs as template ngine
 app.set("view engine", "ejs");
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2":{longURL: "http://www.lighthouselabs.ca", dateCreated: "2021/12/04"},
+  "9sm5xK":{longURL: "http://www.google.com", dateCreated: "2021/12/05"},
 };
 
 // generate random 6 character string for shortURLs
@@ -52,7 +57,7 @@ app.get("/urls", (req, res) => {
 // retrieve longURL from database and redirect to it
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const { longURL } = urlDatabase[shortURL];
   if (longURL) {
     res.redirect(longURL);
   } else {
@@ -70,7 +75,9 @@ app.get("/urls/new", (req, res) => {
 
 // save new URL
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+  urlDatabase[generateRandomString()] = {longURL: req.body.longURL, dateCreated: today};
+  console.log(urlDatabase);
   res.redirect("/urls");
 });
 
@@ -79,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = {
     shortURL: shortURL,
-    longURL: urlDatabase[shortURL],
+    longURL: urlDatabase[shortURL].longURL,
     username: req.cookies.username
   };
   res.render("urls_show", templateVars);
@@ -88,7 +95,8 @@ app.get("/urls/:shortURL", (req, res) => {
 //update URL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.newLongURL;
+  const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+  urlDatabase[shortURL] = {longURL: req.body.longURL, dateCreated: today};
   res.redirect("/urls");
 });
 
