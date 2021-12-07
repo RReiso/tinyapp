@@ -34,6 +34,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// clear cookie when user logs out
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 // show all URLs from database
 app.get("/urls", (req, res) => {
   const templateVars = {
