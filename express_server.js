@@ -13,6 +13,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// generate random string for shortURLs
 const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
@@ -28,17 +29,22 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  console.log(req.body);
 
-  // save the URL in database
+  // save the new URL pair in database
   urlDatabase[generateRandomString()] = req.body.longURL;
   res.redirect("/urls");
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  // retrieve longURL from database and redirect to it
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.send("URL does not exist");
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -48,6 +54,9 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL] };
+  console.log(templateVars);
+
+  // render template with data retrieved from params
   res.render("urls_show", templateVars);
 });
 
