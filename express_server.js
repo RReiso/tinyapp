@@ -32,6 +32,13 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies.username
+  };
+  res.render("register", templateVars);
+});
+
 // set cookie when user logs in
 app.post("/login", (req, res) => {
   const { username } = req.body;
@@ -77,7 +84,6 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
   urlDatabase[generateRandomString()] = {longURL: req.body.longURL, dateCreated: today};
-  console.log(urlDatabase);
   res.redirect("/urls");
 });
 
