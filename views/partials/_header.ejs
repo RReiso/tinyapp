@@ -9,8 +9,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+      <p class=>Hello, <%= username %></p>
       <form class="form-inline" action="/login" method="POST">
-        <div class="form-group mb-2">
+        <!-- <div class="form-group mb-2"> -->
           <label for="username" class="sr-only">Username</label>
           <input class="form-control" type="text" name="username" placeholder="username" style="width: 150px; margin: 0.5rem">
           <button type="submit" class="btn btn-sm btn-outline-secondary">Login</button>
