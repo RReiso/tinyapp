@@ -13,38 +13,30 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// generate random string for shortURLs
+// generate random 6 character string for shortURLs
 const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
-// Routes
+// ROUTES //
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// show all URLs from database
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+// save the new URL pair in database
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-
-  // save the new URL pair in database
   urlDatabase[generateRandomString()] = req.body.longURL;
   res.redirect("/urls");
 });
 
-// delete URL
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
-});
-
+// retrieve longURL from database and redirect to it
 app.get("/u/:shortURL", (req, res) => {
-  // retrieve longURL from database and redirect to it
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   if (longURL) {
@@ -54,17 +46,31 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+// create a new URL
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// show URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL] };
   console.log(templateVars);
-
-  // render template with data retrieved from params
   res.render("urls_show", templateVars);
+});
+
+//update URL
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = req.body.newLongURL;
+  res.redirect("/urls");
+});
+
+// delete URL
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
