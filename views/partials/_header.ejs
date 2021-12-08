@@ -13,7 +13,7 @@
           <a class="nav-link" href="/urls/new">Create New URL</a>
         </li>
         <% if (user) { %> 
-          <p class=>Hello, <%= user.email %></p>
+          <p>Hello, <%= user.email %></p>
           <form class="form-inline" action="/logout" method="POST">
             <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
           </form>
