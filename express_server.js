@@ -21,13 +21,12 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
-const isEmailInDAtabase = (email) =>{
+const userInDatabase = (email) =>{
   for (const user in users) {
     if (users[user].email === email) {
-      return true;
+      return users[user];
     }
   }
-  return false;
 };
 
 /// --- ROUTES --- ///
@@ -68,7 +67,7 @@ app.post("/register", (req, res) => {
   };
 
   // re-render 'register' and warn user if email already exists
-  if (isEmailInDAtabase(email)) {
+  if (userInDatabase(email)) {
     templateVars.error = {message: "Email already registered!"};
     res.render("register",templateVars);
     return;
@@ -109,33 +108,23 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-// logs in user and set cookie
+// log in user and set cookie
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  
-  // const templateVars = {
-  //   error: false,
-  //   user: false
-  // };
+  const currentUser = userInDatabase(email);
 
-  // re-render 'login' and warn user if wrong email/passwrod
-  // TO DO
-  
-  // send 404 if email/password not provided
-  if (email === "" || password === "") {
-    res.send(404);
+  //sen 403 if user does not exist || wrong password
+  if (!currentUser || password !== currentUser.password) {
+    res.send(403);
     return;
   }
 
-  // set cookie
-  // res.cookie("user_id", id);
-  
+  res.cookie("user_id", currentUser.id); // set cookie
   res.redirect("/urls");
 });
 
 // clear cookie when user logs out
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
