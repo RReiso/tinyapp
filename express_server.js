@@ -159,12 +159,18 @@ app.get("/u/:shortURL", (req, res) => {
 
 // show new URL form
 app.get("/urls/new", (req, res) => {
+  const { user_id } = req.cookies;
+
+  if (!user_id) {
+    res.redirect("/login");
+    return;
+  }
   const templateVars = {
     error: false,
     user: false,
     urls: urlDatabase
   };
-  const { user_id } = req.cookies;
+
   for (let user in users) {
     if (users[user].id === user_id) {
       templateVars.user = users[user];
@@ -175,6 +181,14 @@ app.get("/urls/new", (req, res) => {
 
 // create new URL
 app.post("/urls", (req, res) => {
+  const { user_id } = req.cookies;
+
+  // stop not logged in users from creating url
+  if (!user_id) {
+    res.send(403);
+    return;
+  }
+
   const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
   urlDatabase[generateRandomString()] = {longURL: req.body.longURL, dateCreated: today};
   res.redirect("/urls");
@@ -201,9 +215,16 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //update URL
 app.post("/urls/:shortURL", (req, res) => {
+  const { user_id } = req.cookies;
+
+  // stop not logged in users from updating url
+  if (!user_id) {
+    res.send(403);
+    return;
+  }
+
   const { shortURL } = req.params;
   const { longURL } = req.body;
-  console.log(longURL);
   const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
 
   // re-render page with error message if empty string passed
@@ -225,6 +246,14 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const { user_id } = req.cookies;
+
+  // stop not logged in users from deleting url
+  if (!user_id) {
+    res.send(403);
+    return;
+  }
+
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
