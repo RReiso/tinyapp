@@ -189,8 +189,10 @@ app.post("/urls", (req, res) => {
     return;
   }
 
-  const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-  urlDatabase[generateRandomString()] = {longURL: req.body.longURL, dateCreated: today};
+  const { longURL } = req.body;
+  const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+
+  urlDatabase[generateRandomString()] = {longURL, dateCreated, userID: user_id};
   res.redirect("/urls");
 });
 
@@ -250,7 +252,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
   // stop not logged in users from deleting url
   if (!user_id) {
-    res.send(403);
+    res.sendStatus(403);
     return;
   }
 
