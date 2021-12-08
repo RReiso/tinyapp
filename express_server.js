@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require('bcryptjs');
 let { users } = require("./db/users");
 let { urlDatabase } = require("./db/urlDatabase");
 const app = express();
@@ -105,8 +106,9 @@ app.post("/register", (req, res) => {
     return;
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
   // add new user to database and set cookie
-  users[id] = {id, email, password};
+  users[id] = {id, email, password: hashedPassword};
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
@@ -139,9 +141,10 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const existingUser = findUserbyEmail(email);
+  const isPasswordsMatch = bcrypt.compareSync(password, existingUser.password);
 
   //send 403 if user does not exist || wrong password
-  if (!existingUser || password !== existingUser.password) {
+  if (!existingUser || !isPasswordsMatch) {
     res.status(403).send("User does not exist or wrong email/password combination!");
     return;
   }
