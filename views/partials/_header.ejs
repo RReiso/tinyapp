@@ -6,13 +6,13 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
+        <% if (user) { %> 
         <li class="nav-item">
           <a class="nav-link" href="/urls">My URLs</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/urls/new">Create New URL</a>
         </li>
-        <% if (user) { %> 
           <p>Hello, <%= user.email %></p>
           <form class="form-inline" action="/logout" method="POST">
             <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
