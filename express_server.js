@@ -62,7 +62,7 @@ app.post("/register", (req, res) => {
 
   // send 404 if email/password not provided
   if (email === "" || password === "") {
-    res.send(404);
+    res.sendStatus(404);
     return;
   }
 
@@ -116,7 +116,7 @@ app.post("/login", (req, res) => {
 
   //send 403 if user does not exist || wrong password
   if (!currentUser || password !== currentUser.password) {
-    res.send(403);
+    res.sendStatus(403);
     return;
   }
 
@@ -231,7 +231,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.redirect("/urls");
+  const { user_id } = req.cookies;
+
+  // if cookie exists, redirect
+  if (user_id) {
+    res.redirect("urls");
+    return;
+  }
+  res.sendStatus(404);
 });
 
 // listen for incoming requests
