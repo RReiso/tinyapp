@@ -66,6 +66,13 @@ app.post("/register", (req, res) => {
     return;
   }
 
+  // display error message if user passes empty strings
+  if (email.includes(" ") || password.includes(" ")) {
+    templateVars.error = {message: "Email/password cannot include empty spaces!"};
+    res.render("register",templateVars);
+    return;
+  }
+
   // re-render 'register' and show error if email already exists
   if (userInDatabase(email)) {
     templateVars.error = {message: "Email already registered!"};
@@ -107,7 +114,7 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const currentUser = userInDatabase(email);
 
-  //sen 403 if user does not exist || wrong password
+  //send 403 if user does not exist || wrong password
   if (!currentUser || password !== currentUser.password) {
     res.send(403);
     return;
@@ -210,7 +217,8 @@ app.post("/urls/:shortURL", (req, res) => {
     res.render("urls_show",templateVars);
     return;
   }
-
+  
+  // save new URL
   urlDatabase[shortURL] = { longURL, dateCreated };
   res.redirect("/urls");
 });
