@@ -62,7 +62,7 @@ app.post("/register", (req, res) => {
 
   // send 404 if email/password not provided
   if (email === "" || password === "") {
-    res.sendStatus(404);
+    res.status(404).send("Please provide email and password!");
     return;
   }
 
@@ -116,7 +116,7 @@ app.post("/login", (req, res) => {
 
   //send 403 if user does not exist || wrong password
   if (!currentUser || password !== currentUser.password) {
-    res.sendStatus(403);
+    res.status(403).send("User does not exist or wrong email/password combination!");
     return;
   }
 
@@ -161,6 +161,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.cookies;
 
+  // redirect if user not logged in
   if (!user_id) {
     res.redirect("/login");
     return;
@@ -185,7 +186,7 @@ app.post("/urls", (req, res) => {
 
   // stop not logged in users from creating url
   if (!user_id) {
-    res.send(403);
+    res.status(403).send("Only logged in users can create URLs!");
     return;
   }
 
@@ -198,6 +199,14 @@ app.post("/urls", (req, res) => {
 
 // show URL
 app.get("/urls/:shortURL", (req, res) => {
+  const { user_id } = req.cookies;
+
+  // redirect if user not logged in
+  if (!user_id) {
+    res.redirect("/login");
+    return;
+  }
+
   const { shortURL } = req.params;
   const { longURL } = urlDatabase[shortURL];
   const templateVars = {
@@ -206,7 +215,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL,
     shortURL
   };
-  const { user_id } = req.cookies;
+
   for (let user in users) {
     if (users[user].id === user_id) {
       templateVars.user = users[user];
@@ -221,7 +230,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
   // stop not logged in users from updating url
   if (!user_id) {
-    res.send(403);
+    res.status(403).send("Only logged in users can update URLs!");
     return;
   }
 
@@ -252,7 +261,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
   // stop not logged in users from deleting url
   if (!user_id) {
-    res.sendStatus(403);
+    res.status(403).send("Only logged in users can delete URLs!");
     return;
   }
 
@@ -269,7 +278,7 @@ app.get("*", (req, res) => {
     res.redirect("urls");
     return;
   }
-  res.sendStatus(404);
+  res.status(404).send("Page does not exist!");
 });
 
 // listen for incoming requests
