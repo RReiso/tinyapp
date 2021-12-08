@@ -183,9 +183,9 @@ app.get("/urls", (req, res) => {
 
 // retrieve longURL from database and redirect to it
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const { longURL } = urlDatabase[shortURL];
-  if (longURL) {
+  const { shortURL } = req.params;
+  if (urlDatabase[shortURL]) {
+    const { longURL } = urlDatabase[shortURL];
     res.redirect(longURL);
   } else {
     res.send("URL does not exist");
@@ -205,15 +205,20 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     error: false,
     user: false,
-    urls: urlDatabase
   };
 
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  for (let user in users) {
-    if (users[user].id === user_id) {
-      templateVars.user = users[user];
-    }
+
+  // find current user
+  const currUser = findUserByCookie(user_id);
+  if (currUser) {
+    templateVars.user = currUser;
   }
+  // for (let user in users) {
+  //   if (users[user].id === user_id) {
+  //     templateVars.user = users[user];
+  //   }
+  // }
   res.render("urls_new", templateVars);
 });
 
@@ -262,11 +267,18 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  for (let user in users) {
-    if (users[user].id === user_id) {
-      templateVars.user = users[user];
-    }
+
+  // find current user
+  const currUser = findUserByCookie(user_id);
+  if (currUser) {
+    templateVars.user = currUser;
   }
+
+  // for (let user in users) {
+  //   if (users[user].id === user_id) {
+  //     templateVars.user = users[user];
+  //   }
+  // }
   res.render("urls_show", templateVars);
 });
 
