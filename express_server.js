@@ -7,19 +7,30 @@ const app = express();
 const PORT = 8080;
 
 
-// middleware
+//// --- MIDDLEWARE --- ///
 app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
 app.use(cookieParser()); // parse cookie header, populate req.cookies with an object keyed by the cookie names
 
 // use ejs as template ngine
 app.set("view engine", "ejs");
 
+
+//// --- HELPER FUNCTIONS --- ///
 // generate random 6 character string for shortURLs
 const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
-// ROUTES //
+const isEmailInDAtabase = (email) =>{
+  for (const user in users) {
+    if (users[user].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/// --- ROUTES --- ///
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -56,16 +67,20 @@ app.post("/register", (req, res) => {
     user: false
   };
 
-  // check if email already exists in the database
-  for (const user in users) {
-    if (users[user].email === email) {
-      templateVars.error = {message: "Email already registered!"};
-      res.render("register",templateVars);
-      return;
-    }
+  // re-render 'register' and warn user if email already exists
+  if (isEmailInDAtabase(email)) {
+    templateVars.error = {message: "Email already registered!"};
+    res.render("register",templateVars);
+    return;
+  }
+  
+  // send 404 if email/password not provided
+  if (email === "" || password === "") {
+    res.send(404);
+    return;
   }
 
-  // add user to database and set cookie
+  // add new user to database and set cookie
   users[id] = {id, email, password};
   res.cookie("user_id", id);
   res.redirect("/urls");
