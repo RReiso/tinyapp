@@ -6,13 +6,11 @@ let { urlDatabase } = require("./db/urlDatabase");
 const app = express();
 const PORT = 8080;
 
+app.set("view engine", "ejs"); // use ejs as template ngine
 
 //// --- MIDDLEWARE --- ///
 app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
 app.use(cookieParser()); // parse cookie header, populate req.cookies with an object keyed by the cookie names
-
-// use ejs as template ngine
-app.set("view engine", "ejs");
 
 
 //// --- HELPER FUNCTIONS --- ///
@@ -21,6 +19,7 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
+// return user object if it exists
 const userInDatabase = (email) =>{
   for (const user in users) {
     if (users[user].email === email) {
@@ -28,6 +27,7 @@ const userInDatabase = (email) =>{
     }
   }
 };
+
 
 /// --- ROUTES --- ///
 app.get("/", (req, res) => {
@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   const { user_id } = req.cookies;
 
-  // if cookie exists, redirect
+  // if user is logged in, redirect
   if (user_id) {
     res.redirect("urls");
     return;
@@ -90,7 +90,7 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const { user_id } = req.cookies;
 
-  // if cookie exists, redirect
+  // if user is logged in, redirect
   if (user_id) {
     res.redirect("urls");
     return;
@@ -233,7 +233,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("*", (req, res) => {
   const { user_id } = req.cookies;
 
-  // if cookie exists, redirect
+  // if user is logged in, redirect
   if (user_id) {
     res.redirect("urls");
     return;
