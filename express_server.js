@@ -47,11 +47,7 @@ app.get("/register", (req, res) => {
     error: false,
     user: false
   };
-  for (const user in users) {
-    if (users[user].id === user_id) {
-      templateVars.user = users[user];
-    }
-  }
+
   res.render("register", templateVars);
 });
 
@@ -59,23 +55,21 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const id = generateRandomString();
   const { email, password } = req.body;
-  
-
   const templateVars = {
     error: false,
     user: false
   };
 
-  // re-render 'register' and warn user if email already exists
-  if (userInDatabase(email)) {
-    templateVars.error = {message: "Email already registered!"};
-    res.render("register",templateVars);
-    return;
-  }
-  
   // send 404 if email/password not provided
   if (email === "" || password === "") {
     res.send(404);
+    return;
+  }
+
+  // re-render 'register' and show error if email already exists
+  if (userInDatabase(email)) {
+    templateVars.error = {message: "Email already registered!"};
+    res.render("register",templateVars);
     return;
   }
 
@@ -186,7 +180,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     error: false,
     user: false,
-    urls: urlDatabase,
     longURL,
     shortURL
   };
@@ -201,9 +194,24 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //update URL
 app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-  urlDatabase[shortURL] = {longURL: req.body.longURL, dateCreated: today};
+  const { shortURL } = req.params;
+  const { longURL } = req.body;
+  console.log(longURL);
+  const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+
+  // re-render page with error message if empty string passed
+  if (longURL.trim() === "") {
+    const templateVars = {
+      error: {message: "URL cannot be empty"},
+      user: false,
+      longURL,
+      shortURL
+    };
+    res.render("urls_show",templateVars);
+    return;
+  }
+
+  urlDatabase[shortURL] = { longURL, dateCreated };
   res.redirect("/urls");
 });
 
@@ -214,8 +222,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+app.get("*", (req, res) => {
+  res.redirect("/urls");
 });
 
 // listen for incoming requests
