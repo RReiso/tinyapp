@@ -19,13 +19,24 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
-// return user object if it exists
+// return user if it exists
 const userInDatabase = (email) =>{
   for (const user in users) {
     if (users[user].email === email) {
       return users[user];
     }
   }
+};
+
+//check if current logged in user is viewing the URL
+const isCurrentUser = (shortURL, userIDCookie) =>{
+  console.log("here!!!!!");
+  console.log(shortURL, urlDatabase[shortURL], userIDCookie);
+  if (urlDatabase[shortURL].userID === userIDCookie) {
+    console.log("YESS");
+    return true;
+  }
+  return false;
 };
 
 
@@ -101,26 +112,27 @@ app.get("/login", (req, res) => {
     user: false
   };
 
-  for (const user in users) {
-    if (users[user].id === user_id) {
-      templateVars.user = users[user];
-    }
-  }
+
+  // // for (const user in users) {
+  // //   if (users[user].id === user_id) {
+  // //     templateVars.user = users[user];
+  // //   }
+  // // }
   res.render("login", templateVars);
 });
 
 // log in user and set cookie
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const currentUser = userInDatabase(email);
+  const existingUser = userInDatabase(email);
 
   //send 403 if user does not exist || wrong password
-  if (!currentUser || password !== currentUser.password) {
+  if (!existingUser || password !== existingUser.password) {
     res.status(403).send("User does not exist or wrong email/password combination!");
     return;
   }
 
-  res.cookie("user_id", currentUser.id); // set cookie
+  res.cookie("user_id", existingUser.id); // set cookie
   res.redirect("/urls");
 });
 
@@ -138,6 +150,9 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase
   };
   const { user_id } = req.cookies;
+
+
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   for (let user in users) {
     if (users[user].id === user_id) {
       templateVars.user = users[user];
@@ -166,12 +181,14 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
     return;
   }
+
   const templateVars = {
     error: false,
     user: false,
     urls: urlDatabase
   };
 
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   for (let user in users) {
     if (users[user].id === user_id) {
       templateVars.user = users[user];
@@ -200,15 +217,22 @@ app.post("/urls", (req, res) => {
 // show URL
 app.get("/urls/:shortURL", (req, res) => {
   const { user_id } = req.cookies;
+  const { shortURL } = req.params;
+  const { longURL } = urlDatabase[shortURL];
 
-  // redirect if user not logged in
+  // redirect if user is not logged in
   if (!user_id) {
     res.redirect("/login");
     return;
   }
 
-  const { shortURL } = req.params;
-  const { longURL } = urlDatabase[shortURL];
+  // send 403 status if user tries to view URL of another user
+  if (!isCurrentUser(shortURL, user_id)) {
+    res.status(403).send("Cant' view URL of another user!");
+    return;
+  }
+ 
+
   const templateVars = {
     error: false,
     user: false,
@@ -216,6 +240,8 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL
   };
 
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   for (let user in users) {
     if (users[user].id === user_id) {
       templateVars.user = users[user];
@@ -251,21 +277,26 @@ app.post("/urls/:shortURL", (req, res) => {
   }
   
   // save new URL
-  urlDatabase[shortURL] = { longURL, dateCreated };
+  urlDatabase[shortURL] = { longURL, dateCreated, userID: user_id };
   res.redirect("/urls");
 });
 
 // delete URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { user_id } = req.cookies;
+  const { shortURL } = req.params;
 
   // stop not logged in users from deleting url
   if (!user_id) {
     res.status(403).send("Only logged in users can delete URLs!");
     return;
   }
+  
+  if (!isCurrentUser(shortURL, user_id)) {
+    res.status(403).send("Wrong user!");
+    return;
+  }
 
-  const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
