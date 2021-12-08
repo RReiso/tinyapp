@@ -6,21 +6,26 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      </div>
-      <% if (user) { %> 
-        <p class=>Hello, <%= user.email %></p>
-        <form class="form-inline" action="/logout" method="POST">
+        <li class="nav-item">
+          <a class="nav-link" href="/urls">My URLs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/urls/new">Create New URL</a>
+        </li>
+        <% if (user) { %> 
+          <p class=>Hello, <%= user.email %></p>
+          <form class="form-inline" action="/logout" method="POST">
             <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
-        </form>
+          </form>
         <% } else { %> 
-      <form class="form-inline" action="/login" method="POST">
-          <label for="username" class="sr-only">Username</label>
-          <input class="form-control" type="text" name="username" placeholder="username" style="width: 150px; margin: 0.5rem">
-          <button type="submit" class="btn btn-sm btn-outline-secondary">Login</button>
-      </form>
-      <% } %> 
+          <li class="nav-item">
+            <a class="btn btn-primary" href="/login">Login</a> 
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary" href="/register">Register</a> 
+          </li>
+        <% } %> 
+      </div>
     </div>
   </nav>
 </header>

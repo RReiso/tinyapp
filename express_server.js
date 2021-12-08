@@ -86,10 +86,50 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// set cookie when user logs in
+// show login form
+app.get("/login", (req, res) => {
+  const { user_id } = req.cookies;
+
+  // if cookie exists, redirect
+  if (user_id) {
+    res.redirect("urls");
+    return;
+  }
+
+  const templateVars = {
+    error: false,
+    user: false
+  };
+
+  for (const user in users) {
+    if (users[user].id === user_id) {
+      templateVars.user = users[user];
+    }
+  }
+  res.render("login", templateVars);
+});
+
+// logs in user and set cookie
 app.post("/login", (req, res) => {
-  const { username } = req.body;
-  res.cookie("username", username);
+  const { email, password } = req.body;
+  
+  // const templateVars = {
+  //   error: false,
+  //   user: false
+  // };
+
+  // re-render 'login' and warn user if wrong email/passwrod
+  // TO DO
+  
+  // send 404 if email/password not provided
+  if (email === "" || password === "") {
+    res.send(404);
+    return;
+  }
+
+  // set cookie
+  // res.cookie("user_id", id);
+  
   res.redirect("/urls");
 });
 
