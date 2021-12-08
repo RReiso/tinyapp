@@ -1,6 +1,8 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+let { users } = require("./db/users");
+let { urlDatabase } = require("./db/urlDatabase");
 const app = express();
 const PORT = 8080;
 
@@ -12,16 +14,6 @@ app.use(cookieParser()); // parse cookie header, populate req.cookies with an ob
 // use ejs as template ngine
 app.set("view engine", "ejs");
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
-const urlDatabase = {
-  "b2xVn2":{longURL: "http://www.lighthouselabs.ca", dateCreated: "2021/12/04"},
-  "9sm5xK":{longURL: "http://www.google.com", dateCreated: "2021/12/05"},
-};
-
 // generate random 6 character string for shortURLs
 const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
@@ -32,11 +24,32 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// show registration form
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies.username
+    username: req.cookies.username,
+    error: false
   };
   res.render("register", templateVars);
+});
+
+// register new user
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const { email, password } = req.body;
+  for (const user in users) {
+    if (users[user].email === email) {
+      const templateVars = {
+        username: req.cookies.username,
+        error: {message: "Email already registered!"}
+      };
+      res.render("register",templateVars);
+      return;
+    }
+  }
+  users[id] = {id, email, password};
+  console.log(users);
+  res.redirect("/urls");
 });
 
 // set cookie when user logs in
@@ -72,7 +85,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-// create new URL
+// show new URL form
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     username: req.cookies.username
@@ -80,7 +93,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// save new URL
+// create new URL
 app.post("/urls", (req, res) => {
   const today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
   urlDatabase[generateRandomString()] = {longURL: req.body.longURL, dateCreated: today};
