@@ -19,8 +19,8 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2,8);
 };
 
-// return user if it exists
-const userInDatabase = (email) =>{
+// return user if they exist
+const findUserbyEmail = (email) =>{
   for (const user in users) {
     if (users[user].email === email) {
       return users[user];
@@ -28,15 +28,29 @@ const userInDatabase = (email) =>{
   }
 };
 
-//check if current logged in user is viewing the URL
-const isCurrentUser = (shortURL, userIDCookie) =>{
-  console.log("here!!!!!");
-  console.log(shortURL, urlDatabase[shortURL], userIDCookie);
-  if (urlDatabase[shortURL].userID === userIDCookie) {
-    console.log("YESS");
-    return true;
+// return user if they are logged in
+const findUserByCookie = (userIDCookie) =>{
+  for (let user in users) {
+    if (users[user].id === userIDCookie) {
+      return users[user];
+    }
   }
-  return false;
+};
+
+//check if current logged in user is accessing their /urls/:shortURL
+const isCurrentUser = (shortURL, userIDCookie) =>{
+  return urlDatabase[shortURL].userID === userIDCookie;
+};
+
+// return URLs of the current logged in user
+const urlsForUser = (userIDCookie) => {
+  let userURLs = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === userIDCookie) {
+      userURLs[url] = urlDatabase[url];
+    }
+  }
+  return userURLs;
 };
 
 
@@ -85,7 +99,7 @@ app.post("/register", (req, res) => {
   }
 
   // re-render 'register' and show error if email already exists
-  if (userInDatabase(email)) {
+  if (findUserbyEmail(email)) {
     templateVars.error = {message: "Email already registered!"};
     res.render("register",templateVars);
     return;
@@ -124,7 +138,7 @@ app.get("/login", (req, res) => {
 // log in user and set cookie
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const existingUser = userInDatabase(email);
+  const existingUser = findUserbyEmail(email);
 
   //send 403 if user does not exist || wrong password
   if (!existingUser || password !== existingUser.password) {
@@ -144,20 +158,26 @@ app.post("/logout", (req, res) => {
 
 // show all URLs from database
 app.get("/urls", (req, res) => {
+  const { user_id } = req.cookies;
   const templateVars = {
     error: false,
     user: false,
-    urls: urlDatabase
+    urls: urlsForUser(user_id)
   };
-  const { user_id } = req.cookies;
 
 
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  for (let user in users) {
-    if (users[user].id === user_id) {
-      templateVars.user = users[user];
-    }
+  // find current user
+  const currUser = findUserByCookie(user_id);
+  if (currUser) {
+    templateVars.user = currUser;
   }
+
+  // for (let user in users) {
+  //   if (users[user].id === user_id) {
+  //     templateVars.user = users[user];
+  //   }
+  // }
+
   res.render("urls_index", templateVars);
 });
 
@@ -306,7 +326,7 @@ app.get("*", (req, res) => {
 
   // if user is logged in, redirect
   if (user_id) {
-    res.redirect("urls");
+    res.redirect("/urls");
     return;
   }
   res.status(404).send("Page does not exist!");
