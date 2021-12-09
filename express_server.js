@@ -5,6 +5,7 @@ const methodOverride = require('method-override');
 let { urlDatabase } = require("./db/urlDatabase");
 const urlsRouter = require("./routes/urls");
 const authRouter = require("./routes/auth");
+const homeRouter = require("./routes/home");
 
 const app = express();
 const PORT = 8080;
@@ -16,22 +17,11 @@ app.use(bodyParser.urlencoded({extended: true})); // read data from POST request
 app.use(cookieSession({name: 'session', keys:["veryImportantKey1", "veryImportantKey2"]}));
 app.use(methodOverride('_method'));
 app.use("/urls", urlsRouter);
+app.use("/", homeRouter);
 app.use("/", authRouter);
 
 
 /// --- ROUTES --- ///
-app.get("/", (req, res) => {
-  const { user_id } = req.session;
-
-  // if user is logged in, redirect
-  if (user_id) {
-    res.redirect("urls");
-    return;
-  }
-  res.redirect("/login");
-});
-
-
 // retrieve longURL from database and redirect to it
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
