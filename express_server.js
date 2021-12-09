@@ -1,7 +1,7 @@
 const express = require("express");
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
+const methodOverride = require('method-override');
 const bcrypt = require('bcryptjs');
 let { users } = require("./db/users");
 let { urlDatabase } = require("./db/urlDatabase");
@@ -20,9 +20,8 @@ app.set("view engine", "ejs"); // use ejs as template ngine
 
 //// --- MIDDLEWARE --- ///
 app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
-app.use(cookieSession({name: 'session', keys:["veryImportantSecret"]}
-));
-
+app.use(cookieSession({name: 'session', keys:["veryImportantKey1", "veryImportantKey2"]}));
+app.use(methodOverride('_method'));
 
 /// --- ROUTES --- ///
 app.get("/", (req, res) => {
@@ -146,19 +145,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// retrieve longURL from database and redirect to it
-app.get("/u/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-  if (urlDatabase[shortURL]) {
-    urlDatabase[shortURL].timesVisited++;
-    const { longURL } = urlDatabase[shortURL];
-    res.redirect(longURL);
-    return;
-  } else {
-    res.send("URL does not exist");
-  }
-});
-
 // show new URL form
 app.get("/urls/new", (req, res) => {
   const { user_id } = req.session;
@@ -224,7 +210,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 //update URL
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
 
   // stop not logged in users from updating url
@@ -254,8 +240,21 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+// retrieve longURL from database and redirect to it
+app.get("/u/:shortURL", (req, res) => {
+  const { shortURL } = req.params;
+  if (urlDatabase[shortURL]) {
+    urlDatabase[shortURL].timesVisited++;
+    const { longURL } = urlDatabase[shortURL];
+    res.redirect(longURL);
+    return;
+  } else {
+    res.send("URL does not exist");
+  }
+});
+
 // delete URL
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const { user_id } = req.session;
   const { shortURL } = req.params;
 
