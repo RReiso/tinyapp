@@ -5,6 +5,14 @@ const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 let { users } = require("./db/users");
 let { urlDatabase } = require("./db/urlDatabase");
+const {
+  generateRandomString,
+  findUserbyEmail,
+  findUserByCookie,
+  isCurrentUser,
+  urlsForUser
+} = require('./helpers');
+
 const app = express();
 const PORT = 8080;
 
@@ -17,45 +25,6 @@ app.use(cookieSession({name: 'session', keys:["veryImportantSecret"]}
 ));
 
 
-//// --- HELPER FUNCTIONS --- ///
-// generate random 6 character string for shortURLs
-const generateRandomString = () => {
-  return Math.random().toString(36).substring(2,8);
-};
-
-// return user if they exist
-const findUserbyEmail = (email, userDB) =>{
-  for (const user in userDB) {
-    if (userDB[user].email === email) {
-      return userDB[user];
-    }
-  }
-};
-
-// return user if they are logged in
-const findUserByCookie = (userIDCookie, userDB) =>{
-  for (let user in userDB) {
-    if (userDB[user].id === userIDCookie) {
-      return userDB[user];
-    }
-  }
-};
-
-//check if current logged in user is accessing their /urls/:shortURL
-const isCurrentUser = (shortURL, userIDCookie, urlDB) =>{
-  return urlDB[shortURL].userID === userIDCookie;
-};
-
-// return URLs of the current logged in user
-const urlsForUser = (userIDCookie, urlDB) => {
-  let userURLs = {};
-  for (let url in urlDB) {
-    if (urlDB[url].userID === userIDCookie) {
-      userURLs[url] = urlDB[url];
-    }
-  }
-  return userURLs;
-};
 
 
 /// --- ROUTES --- ///
