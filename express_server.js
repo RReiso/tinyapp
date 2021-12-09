@@ -24,34 +24,34 @@ const generateRandomString = () => {
 };
 
 // return user if they exist
-const findUserbyEmail = (email, userDatabase) =>{
-  for (const user in users) {
-    if (userDatabase[user].email === email) {
-      return userDatabase[user];
+const findUserbyEmail = (email, userDB) =>{
+  for (const user in userDB) {
+    if (userDB[user].email === email) {
+      return userDB[user];
     }
   }
 };
 
 // return user if they are logged in
-const findUserByCookie = (userIDCookie) =>{
-  for (let user in users) {
-    if (users[user].id === userIDCookie) {
-      return users[user];
+const findUserByCookie = (userIDCookie, userDB) =>{
+  for (let user in userDB) {
+    if (userDB[user].id === userIDCookie) {
+      return userDB[user];
     }
   }
 };
 
 //check if current logged in user is accessing their /urls/:shortURL
-const isCurrentUser = (shortURL, userIDCookie) =>{
-  return urlDatabase[shortURL].userID === userIDCookie;
+const isCurrentUser = (shortURL, userIDCookie, urlDB) =>{
+  return urlDB[shortURL].userID === userIDCookie;
 };
 
 // return URLs of the current logged in user
-const urlsForUser = (userIDCookie) => {
+const urlsForUser = (userIDCookie, urlDB) => {
   let userURLs = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === userIDCookie) {
-      userURLs[url] = urlDatabase[url];
+  for (let url in urlDB) {
+    if (urlDB[url].userID === userIDCookie) {
+      userURLs[url] = urlDB[url];
     }
   }
   return userURLs;
@@ -145,10 +145,15 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const existingUser = findUserbyEmail(email, users);
-  const isPasswordsMatch = bcrypt.compareSync(password, existingUser.password);
 
+  
   //send 403 if user does not exist || wrong password
-  if (!existingUser || !isPasswordsMatch) {
+  if (!existingUser) {
+    res.status(403).send("User does not exist or wrong email/password combination!");
+    return;
+  }
+  const isPasswordsMatch = bcrypt.compareSync(password, existingUser.password);
+  if (!isPasswordsMatch) {
     res.status(403).send("User does not exist or wrong email/password combination!");
     return;
   }
@@ -171,12 +176,12 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     error: false,
     user: false,
-    urls: urlsForUser(user_id)
+    urls: urlsForUser(user_id, urlDatabase)
   };
 
 
   // find current user
-  const currUser = findUserByCookie(user_id);
+  const currUser = findUserByCookie(user_id, users);
   if (currUser) {
     templateVars.user = currUser;
   }
@@ -219,7 +224,7 @@ app.get("/urls/new", (req, res) => {
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // find current user
-  const currUser = findUserByCookie(user_id);
+  const currUser = findUserByCookie(user_id, users);
   if (currUser) {
     templateVars.user = currUser;
   }
@@ -261,7 +266,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   // send 403 status if user tries to view URL of another user
-  if (!isCurrentUser(shortURL, user_id)) {
+  if (!isCurrentUser(shortURL, user_id, urlDatabase)) {
     res.status(403).send("Cant' view URL of another user!");
     return;
   }
@@ -278,7 +283,7 @@ app.get("/urls/:shortURL", (req, res) => {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // find current user
-  const currUser = findUserByCookie(user_id);
+  const currUser = findUserByCookie(user_id, users);
   if (currUser) {
     templateVars.user = currUser;
   }
@@ -333,7 +338,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     return;
   }
   
-  if (!isCurrentUser(shortURL, user_id)) {
+  if (!isCurrentUser(shortURL, user_id, urlDatabase)) {
     res.status(403).send("Wrong user!");
     return;
   }
