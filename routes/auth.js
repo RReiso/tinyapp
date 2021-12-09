@@ -1,109 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-let { users } = require("../db/users");
-const { generateRandomString, getUserByEmail } = require('../helpers');
+const {
+  getRegister,
+  postRegister,
+  getLogin,
+  postLogin,
+  postLogout
+} = require('../controllers/auth');
 
 
-// show registration form
-router.get("/register", (req, res) => {
-  const { user_id } = req.session;
+// show registration form; register new user
+router.route("/register").get(getRegister).post(postRegister);
 
-  // if user is logged in, redirect
-  if (user_id) {
-    res.redirect("urls");
-    return;
-  }
-  const templateVars = {
-    error: false,
-    user: false
-  };
-
-  res.render("register", templateVars);
-});
-
-
-// register new user
-router.post("/register", (req, res) => {
-  const id = generateRandomString();
-  const { email, password } = req.body;
-  const templateVars = {
-    error: false,
-    user: false
-  };
-
-  // send 404 if email/password not provided
-  if (email === "" || password === "") {
-    res.status(404).send("Email and password cannot be empty!");
-    return;
-  }
-
-  // display error message if user passes empty strings
-  if (email.includes(" ") || password.includes(" ")) {
-    templateVars.error = {message: "Email/password cannot include empty spaces!"};
-    res.render("register",templateVars);
-    return;
-  }
-
-  // re-render 'register' and show error if email already exists
-  if (getUserByEmail(email, users)) {
-    templateVars.error = {message: "Email already registered!"};
-    res.render("register",templateVars);
-    return;
-  }
-
-  // add new user to database and set cookie
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  users[id] = {id, email, password: hashedPassword};
-  req.session.user_id = id;
-  res.redirect("/urls");
-});
-
-
-// show login form
-router.get("/login", (req, res) => {
-  const { user_id } = req.session;
-
-  // if user is logged in, redirect
-  if (user_id) {
-    res.redirect("urls");
-    return;
-  }
-
-  const templateVars = {
-    error: false,
-    user: false
-  };
-
-  res.render("login", templateVars);
-});
-
-
-// log in user and set cookie
-router.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  const existingUser = getUserByEmail(email, users);
-
-  //send 403 if user does not exist || wrong password
-  if (!existingUser) {
-    res.status(403).send("User does not exist or wrong email/password combination!");
-    return;
-  }
-  const isPasswordsMatch = bcrypt.compareSync(password, existingUser.password);
-  if (!isPasswordsMatch) {
-    res.status(403).send("User does not exist or wrong email/password combination!");
-    return;
-  }
-
-  req.session.user_id = existingUser.id; // set cookie
-  res.redirect("/urls");
-});
-
+// show login form; log in user and set cookie
+router.route("/login").get(getLogin).post(postLogin);
 
 // clear cookie when user logs out
-router.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect("/urls");
-});
+router.post("/logout", postLogout);
 
 module.exports = router;
