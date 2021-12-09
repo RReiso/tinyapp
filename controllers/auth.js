@@ -10,39 +10,29 @@ const getRegister = (req, res) => {
     res.redirect("urls");
     return;
   }
-  const templateVars = {
-    error: false,
-    user: false
-  };
 
-  res.render("register", templateVars);
+  res.render("register", {user: false});
 };
 
 const postRegister = (req, res) => {
   const id = generateRandomString();
   const { email, password } = req.body;
-  const templateVars = {
-    error: false,
-    user: false
-  };
 
-  // send 404 if email/password not provided
-  if (email === "" || password === "") {
-    res.status(404).send("Email and password cannot be empty!");
+  // send 400 if email/password not provided
+  if (!email || !password) {
+    res.status(400).send("Email and/or password cannot be empty!");
     return;
   }
 
   // display error message if user passes empty strings
   if (email.includes(" ") || password.includes(" ")) {
-    templateVars.error = {message: "Email/password cannot include empty spaces!"};
-    res.render("register",templateVars);
+    res.status(400).send("Email/password cannot include empty spaces!");
     return;
   }
 
-  // re-render 'register' and show error if email already exists
+  // display error message if email already exists
   if (getUserByEmail(email, users)) {
-    templateVars.error = {message: "Email already registered!"};
-    res.render("register",templateVars);
+    res.status(400).send("Email already registered!");
     return;
   }
 
@@ -62,12 +52,7 @@ const getLogin = (req, res) => {
     return;
   }
 
-  const templateVars = {
-    error: false,
-    user: false
-  };
-
-  res.render("login", templateVars);
+  res.render("login", {user: false});
 };
 
 const postLogin = (req, res) => {
@@ -76,12 +61,12 @@ const postLogin = (req, res) => {
 
   //send 403 if user does not exist || wrong password
   if (!existingUser) {
-    res.status(403).send("User does not exist or wrong email/password combination!");
+    res.status(403).send("User does not exist!");
     return;
   }
   const isPasswordsMatch = bcrypt.compareSync(password, existingUser.password);
   if (!isPasswordsMatch) {
-    res.status(403).send("User does not exist or wrong email/password combination!");
+    res.status(403).send("Wrong email/password combination!");
     return;
   }
 

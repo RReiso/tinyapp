@@ -10,11 +10,9 @@ const {
 const getURLs = (req, res) => {
   const { user_id } = req.session;
   const templateVars = {
-    error: false,
     user: getUserByCookie(user_id, users),
     urls: urlsForUser(user_id, urlDatabase)
   };
-
   res.render("urls_index", templateVars);
 };
 
@@ -26,25 +24,24 @@ const getNewURL = (req, res) => {
     res.redirect("/login");
     return;
   }
-
-  const templateVars = {
-    error: false,
-    user: getUserByCookie(user_id, users),
-  };
-
-  res.render("urls_new", templateVars);
+  res.render("urls_new", {user: getUserByCookie(user_id, users)});
 };
 
 const postURLs = (req, res) => {
   const { user_id } = req.session;
-
+  
   // stop not logged in users from creating url
   if (!user_id) {
     res.status(403).send("Only logged in users can create URLs!");
     return;
   }
-
+  
   const { longURL } = req.body;
+  if (longURL.trim() === "") {
+    res.status(400).send("URL cannot be empty!");
+    return;
+  }
+
   const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
   urlDatabase[generateRandomString()] = {longURL, dateCreated, timesVisited: 0, userID: user_id};
 
@@ -69,7 +66,6 @@ const showURL = (req, res) => {
   }
  
   const templateVars = {
-    error: false,
     user: getUserByCookie(user_id, users),
     url,
     shortURL
@@ -93,14 +89,7 @@ const updateURL = (req, res) => {
 
   // re-render page with error message if empty string passed
   if (longURL.trim() === "") {
-    const templateVars = {
-      error: {message: "URL cannot be empty"},
-      user: false,
-      longURL,
-      shortURL
-    };
-
-    res.render("urls_show",templateVars);
+    res.status(400).send("URL cannot be empty!");
     return;
   }
   
