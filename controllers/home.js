@@ -1,5 +1,3 @@
-
-
 const getHomePage = (req, res) => {
   const { user_id } = req.session;
 
