@@ -19,6 +19,7 @@
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
           <th scope="col">Date created</th>
+          <th scope="col">Click count</th>
           <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
@@ -29,6 +30,7 @@
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
             <td><%= urls[url].dateCreated %></td>
+            <td><%= urls[url].timesVisited %></td>
             <td>
               <a href="/urls/<%= url  %>">
                 <button type="submit" class="btn btn-outline-primary">Edit</button>
@@ -44,10 +46,12 @@
       </tbody>
     </table>
     <% } else { %>
+      <div class="mx-auto my-5" style="width:20rem;">
       <h4>Welcome to the TinyApp!</h4>
       <p>
-        <a class="link" href="/login">Log in</a> or <a class="link" href="/register"> register</a> to create your tiny urls!
+        <a class="link" style="text-decoration: none;"  href="/login">Log in</a> or <a class="link" style="text-decoration: none;" href="/register"> register</a> to create your tiny urls!
       </p>
+    </div>
     <% } %>  
   </main>
   <!-- Bootstrap JS -->

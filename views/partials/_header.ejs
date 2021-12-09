@@ -1,29 +1,37 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+      <div class="navbar-nav flex justify-content-between w-100">
         <% if (user) { %> 
-        <li class="nav-item">
-          <a class="nav-link" href="/urls">My URLs</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/urls/new">Create New URL</a>
-        </li>
-          <p>Hello, <%= user.email %></p>
-          <form class="form-inline" action="/logout" method="POST">
-            <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
-          </form>
+          <div class="d-inline-flex">
+
+            <li class="nav-item">
+              <a class="nav-link" href="/urls">My URLs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/urls/new">Create New URL</a>
+            </li>
+          </div>
+          <div class="d-inline-flex align-items-center">
+
+            <p class="my-0 mx-2">Hello, <%= user.email %></p>
+            <form class="form-inline" action="/logout" method="POST">
+              <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
+            </form>
+          </div>
         <% } else { %> 
-          <li class="nav-item">
-            <a class="btn btn-primary" href="/login">Login</a> 
-          </li>
-          <li class="nav-item">
-            <a class="btn btn-primary" href="/register">Register</a> 
-          </li>
+          <div class="d-flex flex-row-reverse w-100 align-items-center">
+            <li class="nav-item">
+              <a class="btn btn-danger" href="/register">Register</a> 
+            </li>
+            <li class="nav-item">
+              <a class="link my-0 mx-3 text-light" style="text-decoration: none;" href="/login">Login</a> 
+            </li>
+        </div>
         <% } %> 
       </div>
     </div>

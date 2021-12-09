@@ -4,7 +4,7 @@ const generateRandomString = () => {
 };
 
 // return user if they exist
-const findUserbyEmail = (email, userDB) =>{
+const getUserByEmail = (email, userDB) =>{
   for (const user in userDB) {
     if (userDB[user].email === email) {
       return userDB[user];
@@ -13,7 +13,7 @@ const findUserbyEmail = (email, userDB) =>{
 };
 
 // return user if they are logged in
-const findUserByCookie = (userIDCookie, userDB) =>{
+const getUserByCookie = (userIDCookie, userDB) =>{
   for (let user in userDB) {
     if (userDB[user].id === userIDCookie) {
       return userDB[user];
@@ -39,8 +39,8 @@ const urlsForUser = (userIDCookie, urlDB) => {
 
 module.exports = {
   generateRandomString,
-  findUserbyEmail,
-  findUserByCookie,
+  getUserByEmail,
+  getUserByCookie,
   isCurrentUser,
   urlsForUser
 };
