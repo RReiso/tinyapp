@@ -17,14 +17,14 @@
     <main style="margin: 1em;">
       <div class="card mx-auto" style="width: 22rem;">
         <div class="card-body">
-          <h3>Create TinyURL</h3>
+          <h3 class="mb-3">Create TinyURL</h3>
           <form action="/urls" method="POST">
             <div class="form-group mb-2">
               <label for="longURL">Enter a URL:</label>
               <input class="form-control" type="text" name="longURL" required placeholder="http://" aria-describedby="urlHelp"  style="width: 300px">
               <small id="urlHelp" class="form-text text-muted">Start your URL with http:// or https://</small>
             </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="submit" class="btn btn-dark mt-2">Create</button>
           </form>
         </div>
       </div>
