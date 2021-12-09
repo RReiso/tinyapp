@@ -13,7 +13,7 @@ app.set("view engine", "ejs"); // use ejs as template ngine
 //// --- MIDDLEWARE --- ///
 app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
 // app.use(cookieParser()); // parse cookie header, populate req. cookies with an object keyed by the cookie names
-app.use(cookieSession({secret: 'asasasasasassession'}
+app.use(cookieSession({name: 'session', keys:["veryImportantSecret"]}
 ));
 
 
@@ -91,7 +91,7 @@ app.post("/register", (req, res) => {
 
   // send 404 if email/password not provided
   if (email === "" || password === "") {
-    res.status(404).send("Please provide email and password!");
+    res.status(404).send("Email and password cannot be empty!");
     return;
   }
 
