@@ -5,13 +5,8 @@ const methodOverride = require('method-override');
 const bcrypt = require('bcryptjs');
 let { users } = require("./db/users");
 let { urlDatabase } = require("./db/urlDatabase");
-const {
-  generateRandomString,
-  getUserByEmail,
-  getUserByCookie,
-  isCurrentUser,
-  urlsForUser
-} = require('./helpers');
+const urlsRouter = require("./routes/urls");
+const { generateRandomString, getUserByEmail } = require('./helpers');
 
 const app = express();
 const PORT = 8080;
@@ -22,6 +17,7 @@ app.set("view engine", "ejs"); // use ejs as template ngine
 app.use(bodyParser.urlencoded({extended: true})); // read data from POST requests
 app.use(cookieSession({name: 'session', keys:["veryImportantKey1", "veryImportantKey2"]}));
 app.use(methodOverride('_method'));
+app.use("/urls", urlsRouter);
 
 /// --- ROUTES --- ///
 app.get("/", (req, res) => {
@@ -133,113 +129,6 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// show all URLs from database
-app.get("/urls", (req, res) => {
-  const { user_id } = req.session;
-  const templateVars = {
-    error: false,
-    user: getUserByCookie(user_id, users),
-    urls: urlsForUser(user_id, urlDatabase)
-  };
-
-  res.render("urls_index", templateVars);
-});
-
-// show new URL form
-app.get("/urls/new", (req, res) => {
-  const { user_id } = req.session;
-
-  // redirect if user not logged in
-  if (!user_id) {
-    res.redirect("/login");
-    return;
-  }
-
-  const templateVars = {
-    error: false,
-    user: getUserByCookie(user_id, users),
-  };
-
-  res.render("urls_new", templateVars);
-});
-
-// create new URL
-app.post("/urls", (req, res) => {
-  const { user_id } = req.session;
-
-  // stop not logged in users from creating url
-  if (!user_id) {
-    res.status(403).send("Only logged in users can create URLs!");
-    return;
-  }
-
-  const { longURL } = req.body;
-  const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-
-  urlDatabase[generateRandomString()] = {longURL, dateCreated, timesVisited: 0, userID: user_id};
-  res.redirect("/urls");
-});
-
-// show URL
-app.get("/urls/:shortURL", (req, res) => {
-  const { user_id } = req.session;
-  const { shortURL } = req.params;
-  const  url  = urlDatabase[shortURL];
-
-  // redirect if user is not logged in
-  if (!user_id) {
-    res.status(403).send("Must be logged in!");
-    return;
-  }
-
-  // send 403 status if user tries to view URL of another user
-  if (!isCurrentUser(shortURL, user_id, urlDatabase)) {
-    res.status(403).send("Can't view URL of another user!");
-    return;
-  }
- 
-
-  const templateVars = {
-    error: false,
-    user: getUserByCookie(user_id, users),
-    url,
-    shortURL
-  };
-
-  res.render("urls_show", templateVars);
-});
-
-//update URL
-app.put("/urls/:shortURL", (req, res) => {
-  const { user_id } = req.session;
-
-  // stop not logged in users from updating url
-  if (!user_id) {
-    res.status(403).send("Only logged in users can update URLs!");
-    return;
-  }
-
-  const { shortURL } = req.params;
-  const { longURL } = req.body;
-  const dateCreated = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-
-  // re-render page with error message if empty string passed
-  if (longURL.trim() === "") {
-    const templateVars = {
-      error: {message: "URL cannot be empty"},
-      user: false,
-      longURL,
-      shortURL
-    };
-    res.render("urls_show",templateVars);
-    return;
-  }
-  
-  // save new URL
-  urlDatabase[shortURL] = { longURL, dateCreated, timesVisited: 0, userID: user_id };
-  res.redirect("/urls");
-});
-
 // retrieve longURL from database and redirect to it
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
@@ -251,26 +140,6 @@ app.get("/u/:shortURL", (req, res) => {
   } else {
     res.send("URL does not exist");
   }
-});
-
-// delete URL
-app.delete("/urls/:shortURL", (req, res) => {
-  const { user_id } = req.session;
-  const { shortURL } = req.params;
-
-  // stop not logged in users from deleting url
-  if (!user_id) {
-    res.status(403).send("Only logged in users can delete URLs!");
-    return;
-  }
-  
-  if (!isCurrentUser(shortURL, user_id, urlDatabase)) {
-    res.status(403).send("Wrong user!");
-    return;
-  }
-
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
 });
 
 app.get("*", (req, res) => {
