@@ -10,7 +10,7 @@
 </p>
 
 ## Description
-This is a URL shortening app that was built as a week 3 project for the Lighthouse Labs bootcamp.
+This is a URL shortening app that was built with Node.js and Express as a week 3 project for the Lighthouse Labs bootcamp.
 
 ## Key Features
 * Registration and Login with session cookies
@@ -22,13 +22,13 @@ This is a URL shortening app that was built as a week 3 project for the Lighthou
 
 ## Project Screenshots
 <p align="center">
-  <img src="./images/login.png" width="250">
+  <img src="./docs/login-page.png" width="250">
 </p>
 <p align="center">
-  <img src ="./images/welcome-page.png" width="400">
+  <img src ="./docs/welcome-page.png" width="400">
 </p>
 <p align="center">
-  <img src ="./images/urls.png" width="500">
+  <img src ="./docs/urls-page.png" width="500">
 </p>
 
 ## Built With
@@ -36,7 +36,17 @@ This is a URL shortening app that was built as a week 3 project for the Lighthou
 * [Express](https://expressjs.com/) - Node.js Web Framework
 * [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) - CSS Framework
 
-## Installation
+## Dependencies
+
+*  Node.js
+*  Express
+*  EJS
+*  bcrypt
+*  body-parser
+*  cookie-session
+*  method-override
+
+## Getting Started
 Clone the repository:
 ```
 git clone git@github.com:RReiso/tinyapp.git
