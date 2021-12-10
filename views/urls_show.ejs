@@ -12,10 +12,10 @@
     <div class="card mx-auto mt-4 mb-2" style="max-width: 50rem;">
       <div class="card-body">
         <h4 class="mb-3">URL details:</h4>
-        <p class="card-text">Long URL: <%= url.longURL %></p>
+        <p class="card-text">Long URL: <a href="<%= url.longURL %>"><%= url.longURL %></a></p>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>" style="text-decoration:none;"><%= shortURL %></a></p>
         <p class="card-text">Date created: <%= url.dateCreated %> </p>
-        <p class="card-text">Click count: <%= url.timesVisited %> </p>
+        <p class="card-text">Visits: <%= url.timesVisited %> </p>
       </div>
     </div>
     <div class="card mx-auto mt-3 mb-2" style="max-width: 22rem;">
