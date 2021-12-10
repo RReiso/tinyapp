@@ -8,7 +8,7 @@ const authRouter = require("./routes/auth");
 const homeRouter = require("./routes/home");
 
 const app = express();
-const PORT = 8080;
+const port = 8080;
 
 app.set("view engine", "ejs"); // use ejs as template ngine
 
@@ -35,7 +35,6 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-
 // all 404 routes
 app.get("*", (req, res) => {
   const { user_id } = req.session;
@@ -48,8 +47,7 @@ app.get("*", (req, res) => {
   res.status(404).send("Page does not exist!");
 });
 
-
 // listen for incoming requests
-app.listen(PORT, () => {
-  console.log(`TinyApp listening on port ${PORT}!`);
+app.listen(process.env.PORT || port, () => {
+  console.log(`TinyApp listening on port ${port}!`);
 });
