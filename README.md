@@ -22,11 +22,14 @@ This is a URL shortening app that was built as a week 3 project for the Lighthou
 
 ## Project Screenshots
 <p align="center">
-  <img src="./images/login.png" width="250"></p>
- <p align="center">
+  <img src="./images/login.png" width="250">
+</p>
+<p align="center">
   <img src ="./images/welcome-page.png" width="400">
+</p>
+<p align="center">
   <img src ="./images/urls.png" width="500">
-  </p>
+</p>
 
 ## Built With
 * [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) - Programming language
