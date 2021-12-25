@@ -1,10 +1,10 @@
 // generate random 6 character string for shortURLs
 const generateRandomString = () => {
-  return Math.random().toString(36).substring(2,8);
+  return Math.random().toString(36).substring(2, 8);
 };
 
 // return user if they exist
-const getUserByEmail = (email, userDB) =>{
+const getUserByEmail = (email, userDB) => {
   for (const user in userDB) {
     if (userDB[user].email === email) {
       return userDB[user];
@@ -12,17 +12,8 @@ const getUserByEmail = (email, userDB) =>{
   }
 };
 
-// return user if they are logged in
-const getUserByCookie = (userIDCookie, userDB) =>{
-  for (let user in userDB) {
-    if (userDB[user].id === userIDCookie) {
-      return userDB[user];
-    }
-  }
-};
-
 //check if current logged in user is accessing their /urls/:shortURL
-const isCurrentUser = (shortURL, userIDCookie, urlDB) =>{
+const isCurrentUser = (shortURL, userIDCookie, urlDB) => {
   return urlDB[shortURL].userID === userIDCookie;
 };
 
@@ -40,7 +31,6 @@ const urlsForUser = (userIDCookie, urlDB) => {
 module.exports = {
   generateRandomString,
   getUserByEmail,
-  getUserByCookie,
   isCurrentUser,
-  urlsForUser
+  urlsForUser,
 };
