@@ -35,10 +35,13 @@ const postURLs = (req, res) => {
     return;
   }
 
-  const { longURL } = req.body;
+  let { longURL } = req.body;
   if (longURL.trim() === "") {
     res.status(400).send("URL cannot be empty!");
     return;
+  }
+  if (!longURL.includes("http")) {
+    longURL = "https://" + longURL;
   }
 
   const dateCreated = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
@@ -88,13 +91,17 @@ const updateURL = (req, res) => {
   }
 
   const { shortURL } = req.params;
-  const { longURL } = req.body;
+  let { longURL } = req.body;
   const dateCreated = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
 
   // re-render page with error message if empty string passed
   if (longURL.trim() === "") {
     res.status(400).send("URL cannot be empty!");
     return;
+  }
+
+  if (!longURL.includes("http")) {
+    longURL = "https://" + longURL;
   }
 
   // save new URL
